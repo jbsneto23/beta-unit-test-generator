@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test-suite>
+    <machine-name>ATM</machine-name>
+    <machine-invariant>
+        <invariant-clause>account_balance : INT</invariant-clause>
+        <invariant-clause>account_balance &gt;= 0</invariant-clause>
+        <invariant-clause>account_id : INT</invariant-clause>
+    </machine-invariant>
+    <operation-under-test>deposit</operation-under-test>
+    <testing-strategy>Logical Coverage</testing-strategy>
+    <coverage-criteria>Clause Coverage</coverage-criteria>
+    <oracle-strategy>
+        <state-variables>true</state-variables>
+        <return-variables>true</return-variables>
+        <invariant-ok>true</invariant-ok>
+    </oracle-strategy>
+    <test-cases>
+        <test-case>
+            <id>1</id>
+            <formula>mm : INT &amp; account_balance : INT &amp; account_id : INT &amp; account_balance &gt;= 0 &amp; not(mm &gt; 0)</formula>
+            <isNegative>false</isNegative>
+            <state-variables>
+                <variable>
+                    <identifier>account_id</identifier>
+                    <values>
+                        <value>-1</value>
+                    </values>
+                </variable>
+                <variable>
+                    <identifier>account_balance</identifier>
+                    <values>
+                        <value>0</value>
+                    </values>
+                </variable>
+            </state-variables>
+            <operation-parameters>
+                <parameter>
+                    <identifier>mm</identifier>
+                    <values>
+                        <value>-1</value>
+                    </values>
+                </parameter>
+            </operation-parameters>
+        </test-case>
+        <test-case>
+            <id>2</id>
+            <formula>mm : INT &amp; account_balance : INT &amp; mm &gt; 0 &amp; account_id : INT &amp; account_balance &gt;= 0</formula>
+            <isNegative>false</isNegative>
+            <state-variables>
+                <variable>
+                    <identifier>account_id</identifier>
+                    <values>
+                        <value>-1</value>
+                    </values>
+                </variable>
+                <variable>
+                    <identifier>account_balance</identifier>
+                    <values>
+                        <value>0</value>
+                    </values>
+                </variable>
+            </state-variables>
+            <operation-parameters>
+                <parameter>
+                    <identifier>mm</identifier>
+                    <values>
+                        <value>1</value>
+                    </values>
+                </parameter>
+            </operation-parameters>
+        </test-case>
+    </test-cases>
+</test-suite>

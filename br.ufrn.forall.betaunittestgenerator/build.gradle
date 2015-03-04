@@ -1,0 +1,22 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: 'application'
+
+mainClassName = 'Main'
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'Main'
+    }
+}
+
+repositories {   	
+        mavenCentral()
+}
+
+dependencies {
+	testCompile "junit:junit:4.11"
+	compile 'commons-lang:commons-lang:2.6'
+	compile 'xom:xom:1.2.5'
+}
