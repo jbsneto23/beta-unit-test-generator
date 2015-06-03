@@ -179,10 +179,10 @@ private str variableAttribution(TestSuite testSuite, str formula, str identifier
 			attribution = attribution + "{}";
 		} else {
 			Expression exp = parse(#Expression, head(values)); // array with the values
-			attribution = attribution + "{" + translateExp("", exp);
+			attribution = attribution + "{" + translateExp( exp);
 			for (str s <- tail(values)) {
 				exp = parse(#Expression, s);
-				attribution = attribution + ", " + translateExp("", exp);
+				attribution = attribution + ", " + translateExp( exp);
 			}
 			attribution = attribution + "}";
 		}
@@ -192,7 +192,7 @@ private str variableAttribution(TestSuite testSuite, str formula, str identifier
 			if(val == "{-}")
 				val = "{}";
 			Expression exp = parse(#Expression, val);
-			attribution = attribution + translateExp("", exp); // simple variable attribution
+			attribution = attribution + translateExp( exp); // simple variable attribution
 		}
 	}
 	return attribution;
@@ -227,7 +227,7 @@ Synopsis: Function that verify if the check invariant function content isn't emp
 private bool hasCheckInvariant(TestSuite testSuite){
 	bool has = false;
 	for(str p <- testSuite.machineInvariant){
-		if(!isEmpty(translate(p, toLowerCase(testSuite.machineName)))){
+		if(!isEmpty(translate(p))){
 			has = true;
 		}
 	}
@@ -242,11 +242,12 @@ Synopsis: Function that create the check invariant function content. Call functi
 private str templateCheckInvariant(TestSuite testSuite){
 	return 
 		"void check_invariant(CuTest* tc, <testSuite.machineName>$state$ <toLowerCase(testSuite.machineName)>) {
-		'	<for(str p <- testSuite.machineInvariant){><if(!isEmpty(translate(p, toLowerCase(testSuite.machineName)))){>
-		'	if(!(<translate(p, toLowerCase(testSuite.machineName))>)){
+		'	<for(str p <- testSuite.machineInvariant){><if(!isEmpty(translate(p))){>
+		'	if(!(<translate(p)>)){
 		'		CuFail(tc, \"The invariant \'<p>\' was unsatisfied\");
 		'	}
-		'	<} else {>// Predicate \'<p>\' can\'t be automatically translated <}><}>
+		'	<} else {>// Predicate \'<p>\' can\'t be automatically translated <}>
+		'   <}>
 		'}
 		";
 }

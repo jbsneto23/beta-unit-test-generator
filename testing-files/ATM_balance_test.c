@@ -8,15 +8,15 @@ ATM$state$ atm;
 
 void check_invariant(CuTest* tc, ATM$state$ atm) {
 	
-	if(!(&atm.account_balance != NULL /* account_balance : INT */)){
+	if(!(account_balance)){
 		CuFail(tc, "The invariant 'account_balance : INT' was unsatisfied");
 	}
 	
-	if(!(atm.account_balance >= 0)){
+	if(!(account_balance >= 0)){
 		CuFail(tc, "The invariant 'account_balance >= 0' was unsatisfied");
 	}
 	
-	if(!(&atm.account_id != NULL /* account_id : INT */)){
+	if(!(account_id)){
 		CuFail(tc, "The invariant 'account_id : INT' was unsatisfied");
 	}
 	

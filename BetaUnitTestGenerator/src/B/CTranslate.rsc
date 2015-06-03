@@ -37,57 +37,52 @@ import String;
 import ParseTree;
 import IO;
 
-public str translate(str txt, str struct) = translatePred(struct, parse(#Predicate, txt));
-public str translate(str txt) = translatePred("", parse(#Predicate, txt));
+public str translate(str txt) = translatePred(parse(#Predicate, txt));
+//public str translate(str txt) = translatePred("", parse(#Predicate, txt));
 
-public str translatePred(str struct, (Predicate) `(<Predicate p>)`) = "(<translatePred(struct, p)>)";
-public str translatePred(str struct, (Predicate) `not(<Predicate p>)`) = "!(<translatePred(struct, p)>)";
-public str translatePred(str struct, (Predicate) `<Predicate p1>&<Predicate p2>`) = "<translatePred(struct, p1)> && <translatePred(struct, p2)>";
-public str translatePred(str struct, (Predicate) `<Predicate p1>or<Predicate p2>`) = "<translatePred(struct, p1)> || <translatePred(struct, p2)>";
-public str translatePred(str struct, (Predicate) `<Predicate p1>=\><Predicate p2>`) = "!(<translatePred(struct, p1)>) || <translatePred(struct, p2)>";
-public str translatePred(str struct, (Predicate) `<Predicate p1>\<=\><Predicate p2>`) = "(<translatePred(struct, p1)> && <translatePred(struct, p2)>) || !(<translatePred(struct, p1)> || <translatePred(struct, p2)>)";
-public str translatePred(str struct, (Predicate) `<Expression e1>=<Expression e2>`) = "<translateExp(struct, e1)> == <translateExp(struct, e2)>";
-public str translatePred(str struct, (Predicate) `<Expression e1>/=<Expression e2>`) = "<translateExp(struct, e1)> != <translateExp(struct, e2)>";
-public str translatePred(str struct, (Predicate) `<Expression e1>\<=<Expression e2>`) = "<translateExp(struct, e1)> \<= <translateExp(struct, e2)>";
-public str translatePred(str struct, (Predicate) `<Expression e1>\<<Expression e2>`) = "<translateExp(struct, e1)> \< <translateExp(struct, e2)>";
-public str translatePred(str struct, (Predicate) `<Expression e1>\>=<Expression e2>`) = "<translateExp(struct, e1)> \>= <translateExp(struct, e2)>";
-public str translatePred(str struct, (Predicate) `<Expression e1>\><Expression e2>`) = "<translateExp(struct, e1)> \> <translateExp(struct, e2)>";
-public str translatePred(str struct, (Predicate) `<Expression e1>:<Expression e2>`) {
+public str translatePred((Predicate) `(<Predicate p>)`) = "(<translatePred( p)>)";
+public str translatePred((Predicate) `not(<Predicate p>)`) = "!(<translatePred( p)>)";
+public str translatePred((Predicate) `<Predicate p1>&<Predicate p2>`) = "<translatePred( p1)> && <translatePred( p2)>";
+public str translatePred((Predicate) `<Predicate p1>or<Predicate p2>`) = "<translatePred( p1)> || <translatePred( p2)>";
+public str translatePred((Predicate) `<Predicate p1>=\><Predicate p2>`) = "!(<translatePred( p1)>) || <translatePred( p2)>";
+public str translatePred((Predicate) `<Predicate p1>\<=\><Predicate p2>`) = "(<translatePred( p1)> && <translatePred( p2)>) || !(<translatePred( p1)> || <translatePred( p2)>)";
+public str translatePred((Predicate) `<Expression e1>=<Expression e2>`) = "<translateExp(e1)> == <translateExp(e2)>";
+public str translatePred((Predicate) `<Expression e1>/=<Expression e2>`) = "<translateExp(e1)> != <translateExp(e2)>";
+public str translatePred((Predicate) `<Expression e1>\<=<Expression e2>`) = "<translateExp(e1)> \<= <translateExp(e2)>";
+public str translatePred((Predicate) `<Expression e1>\<<Expression e2>`) = "<translateExp(e1)> \< <translateExp(e2)>";
+public str translatePred((Predicate) `<Expression e1>\>=<Expression e2>`) = "<translateExp(e1)> \>= <translateExp(e2)>";
+public str translatePred((Predicate) `<Expression e1>\><Expression e2>`) = "<translateExp(e1)> \> <translateExp(e2)>";
+public str translatePred((Predicate) `<Expression e1>:<Expression e2>`) {
 	if((Expression) `<Expression i1>..<Expression i2>` := e2){
-		return "<translateExp(struct, e1)> \>= <translateExp(struct, i1)> && <translateExp(struct, e1)> \<= <translateExp(struct, i2)>";	
+		return "<translateExp(e1)> \>= <translateExp(i1)> && <translateExp(e1)> \<= <translateExp(i2)>";	
 	} else {
-		return "&<translateExp(struct, e1)> != NULL /* <e1> : <e2> */";
+		return "";
 	}
 }
-public default str translatePred(str struct, Predicate p) = "";
+public default str translatePred( Predicate p) = "";
 
-public str translateExp(str struct, (Expression) `<Ident id>`){
-	if(isEmpty(struct)){
-		return "<id>";
-	} else {
-		return struct + "." + "<id>";
-	}
-}
-public str translateExp(str struct, (Expression) `(<Expression e>)`) = "(<translateExp(struct, e)>)";
+public str translateExp((Expression) `<Ident id>`) = "<id>";
 
-public str translateExp(str struct, (Expression) `TRUE`) = "true";
-public str translateExp(str struct, (Expression) `FALSE`) = "false";
-public str translateExp(str struct, (Expression) `bool(<Predicate p>)`) = translatePred(struct, p);
+public str translateExp((Expression) `(<Expression e>)`) = "(<translateExp( e)>)";
 
-public str translateExp(str struct, (Expression) `<Integer_literal i>`) = "<i>";
-public str translateExp(str struct, (Expression) `MAXINT`) = "INT32_MAX";
-public str translateExp(str struct, (Expression) `MININT`) = "INT32_MIN";
+public str translateExp((Expression) `TRUE`) = "true";
+public str translateExp((Expression) `FALSE`) = "false";
+public str translateExp((Expression) `bool(<Predicate p>)`) = translatePred( p);
 
-public str translateExp(str struct, (Expression) `<Expression e1>+<Expression e2>`) = "<translateExp(struct, e1)> + <translateExp(struct, e2)>";
-public str translateExp(str struct, (Expression) `<Expression e1>-<Expression e2>`) = "<translateExp(struct, e1)> - <translateExp(struct, e2)>";
-public str translateExp(str struct, (Expression) `-<Expression e>`) = "-<translateExp(struct, e)>";
-public str translateExp(str struct, (Expression) `<Expression e1>*<Expression e2>`) = "<translateExp(struct, e1)> * <translateExp(struct, e2)>";
-public str translateExp(str struct, (Expression) `<Expression e1>/<Expression e2>`) = "<translateExp(struct, e1)> / <translateExp(struct, e2)>";
-public str translateExp(str struct, (Expression) `<Expression e1>mod<Expression e2>`) = "<translateExp(struct, e1)> % <translateExp(struct, e2)>";
-public str translateExp(str struct, (Expression) `<Expression e1>**<Expression e2>`) = "java.lang.Math.pow(<translateExp(struct, e1)>, <translateExp(struct, e2)>)";
-public str translateExp(str struct, (Expression) `succ(<Expression e>)`) = "(<translateExp(struct, e)> + 1)";
-public str translateExp(str struct, (Expression) `pred(<Expression e>)`) = "(<translateExp(struct, e)> - 1)";
+public str translateExp((Expression) `<Integer_literal i>`) = "<i>";
+public str translateExp((Expression) `MAXINT`) = "INT32_MAX";
+public str translateExp((Expression) `MININT`) = "INT32_MIN";
 
-public str translateExp(str struct, (Expression) `<Expression e1>|-\><Expression e2>`) = "<translateExp(struct, e2)>";
+public str translateExp((Expression) `<Expression e1>+<Expression e2>`) = "<translateExp(e1)> + <translateExp(e2)>";
+public str translateExp((Expression) `<Expression e1>-<Expression e2>`) = "<translateExp(e1)> - <translateExp(e2)>";
+public str translateExp((Expression) `-<Expression e>`) = "-<translateExp( e)>";
+public str translateExp((Expression) `<Expression e1>*<Expression e2>`) = "<translateExp(e1)> * <translateExp(e2)>";
+public str translateExp((Expression) `<Expression e1>/<Expression e2>`) = "<translateExp(e1)> / <translateExp(e2)>";
+public str translateExp((Expression) `<Expression e1>mod<Expression e2>`) = "<translateExp(e1)> % <translateExp(e2)>";
+public str translateExp((Expression) `<Expression e1>**<Expression e2>`) = "pow(<translateExp(e1)>, <translateExp(e2)>)";
+public str translateExp((Expression) `succ(<Expression e>)`) = "(<translateExp( e)> + 1)";
+public str translateExp((Expression) `pred(<Expression e>)`) = "(<translateExp( e)> - 1)";
 
-public default str translateExp(str object, Expression e) = "<e>";
+public str translateExp((Expression) `<Expression e1>|-\><Expression e2>`) = "<translateExp(e2)>";
+
+public default str translateExp(Expression e) = "<e>";
