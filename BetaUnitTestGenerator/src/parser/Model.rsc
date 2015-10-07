@@ -38,12 +38,9 @@ import List;
 data TestSuite = TestSuite(str machineName, list[str] machineInvariant, str operationUnderTest,
 							str testingStrategy, str coverageCriteria,
 							list[TestCase] testCases, list[OracleStrategy] oracleStrategies);
-							
-// partitionStrategy changed to testingStrategy
-// combinatorialCriteria changed to coverageCriteria
 
 data TestCase = TestCase(int id, str formula, bool negative, list[Variable] stateVariables,
-						  list[Parameter] operationParameters, list[Variable] returnVariables);
+						  list[Parameter] operationParameters, list[Variable] expectedStateVariables, list[Variable] returnVariables);
 
 data OracleStrategy = StateInvariant()
 					| ReturnValues()

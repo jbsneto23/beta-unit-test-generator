@@ -3,3 +3,5 @@ bin/
 .gradle/
 .settings/
 br.ufrn.forall.betaunittestgenerator/.settings/
+br.ufrn.forall.betaunittestgenerator/.classpath
+br.ufrn.forall.betaunittestgenerator/.settings/org.eclipse.jdt.core.prefs

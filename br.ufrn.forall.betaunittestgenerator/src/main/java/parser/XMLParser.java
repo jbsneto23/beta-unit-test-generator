@@ -41,14 +41,18 @@ public class XMLParser {
 			String machineName = root.getFirstChildElement("machine-name")
 					.getValue();
 
-			Elements machineInvariantXML = root.getFirstChildElement(
-					"machine-invariant").getChildElements("invariant-clause");
-
+			Element machineInvariantXML = root.getFirstChildElement(
+					"machine-invariant");
+			
 			List<String> machineInvariant = new ArrayList<String>();
+			
+			if(machineInvariantXML != null){
+				Elements machineInvariantClausesXML = machineInvariantXML.getChildElements("invariant-clause");
 
-			for (int i = 0; i < machineInvariantXML.size(); i++) {
-				String invariantClause = machineInvariantXML.get(i).getValue();
-				machineInvariant.add(invariantClause);
+				for (int i = 0; i < machineInvariantClausesXML.size(); i++) {
+					String invariantClause = machineInvariantClausesXML.get(i).getValue();
+					machineInvariant.add(invariantClause);
+				}
 			}
 
 			String operationUnderTest = root.getFirstChildElement(
@@ -142,6 +146,34 @@ public class XMLParser {
 						operationParameters.add(parameter);
 					}
 				}
+				
+				Element expectedStateVariablesMainXML = testCaseXML
+						.getFirstChildElement("expected-state-values");
+				List<Variable> expectedStateVariables = new ArrayList<Variable>();
+
+				if (expectedStateVariablesMainXML != null) {
+					Elements stateVariablesXML = expectedStateVariablesMainXML
+							.getChildElements("variable");
+
+					for (int j = 0; j < stateVariablesXML.size(); j++) {
+						Element stateXML = stateVariablesXML.get(j);
+
+						String identifier = stateXML.getFirstChildElement(
+								"identifier").getValue();
+						Element valueXML = stateXML.getFirstChildElement(
+								"values");
+						List<String> values = new ArrayList<String>();
+						if(valueXML != null){
+							Elements valuesXML = valueXML.getChildElements("value");
+							for (int k = 0; k < valuesXML.size(); k++) {
+								String value = valuesXML.get(k).getValue();
+								values.add(value);
+							}
+						}
+						Variable variable = new Variable(identifier, values);
+						expectedStateVariables.add(variable);
+					}
+				}
 
 				Element returnVariablesMainXML = testCaseXML
 						.getFirstChildElement("return-variables");
@@ -156,14 +188,24 @@ public class XMLParser {
 
 							String identifier = stateXML.getFirstChildElement(
 									"identifier").getValue();
-
-							Variable variable = new Variable(identifier, null);
+							Element valueXML = stateXML.getFirstChildElement(
+									"values");
+							List<String> values = new ArrayList<String>();
+							if(valueXML != null){
+								Elements valuesXML = valueXML.getChildElements("value");
+							
+								for (int k = 0; k < valuesXML.size(); k++) {
+									String value = valuesXML.get(k).getValue();
+									values.add(value);
+								}
+							}
+							Variable variable = new Variable(identifier, values);
 							returnVariables.add(variable);
 						}
 					}
 				}
 				TestCase testCase = new TestCase(id, formula, negative,
-						stateVariables, operationParameters, returnVariables);
+						stateVariables, operationParameters, expectedStateVariables, returnVariables);
 
 				testCases.add(testCase);
 			}

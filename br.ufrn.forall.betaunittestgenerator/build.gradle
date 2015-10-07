@@ -1,3 +1,8 @@
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
@@ -15,8 +20,29 @@ repositories {
         mavenCentral()
 }
 
+task configurationsFiles {
+	println 'Copying properties files to proper folders'
+	
+	// to libs folder
+	Path source = Paths.get("config.properties");
+	Path libsFolder = Paths.get("build/libs/config.properties");
+	Files.copy(source, libsFolder, StandardCopyOption.REPLACE_EXISTING);
+	
+	println 'Done!'
+}
+
+task createPropertiesFile {
+	def propertiesFile = file("$buildDir/libs/config.properties")
+	outputs.file propertiesFile
+}
+
+applicationDistribution.from(createPropertiesFile) {
+    into "lib"
+}
+
 dependencies {
 	testCompile "junit:junit:4.11"
 	compile 'commons-lang:commons-lang:2.6'
 	compile 'xom:xom:1.2.5'
+	compile 'commons-configuration:commons-configuration:1.9'
 }

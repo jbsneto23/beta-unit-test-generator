@@ -51,6 +51,7 @@ public class RascalParser {
 			rascal = rascal + "bool negative_" + i + " = " + testCase.isNegative() + ";"+ "\n";
 			rascal = rascal + "list[Variable] stateVariables_" + i + " = [];"+ "\n";
 			rascal = rascal + "list[Parameter] operationParameters_" + i + " = [];"+ "\n"; 
+			rascal = rascal + "list[Variable] expectedStateVariables_" + i + " = [];"+ "\n";
 			rascal = rascal + "list[Variable] returnVariables_" + i + " = [];"+ "\n";
 			rascal = rascal + "str identifier_" + i + " = \"\";"+ "\n";
 			rascal = rascal + "list[str] values_" + i + " = [];"+ "\n";
@@ -70,6 +71,14 @@ public class RascalParser {
 				}
 				rascal = rascal + "operationParameters_" + i + " = operationParameters_" + i + " + Parameter(identifier_" + i + ", values_" + i + ");"+ "\n";
 			}
+			for(Variable variable : testCase.getExpectedStateVariables()){
+				rascal = rascal + "identifier_" + i + " = \"" + replaceRascalEscapedCharacter(variable.getIdentifier()) + "\";"+ "\n";
+				rascal = rascal + "values_" + i + " = [];"+ "\n";
+				for(String v : variable.getValues()){
+					rascal = rascal + "values_" + i + " = values_" + i + " + \"" + replaceRascalEscapedCharacter(v) + "\";"+ "\n";
+				}
+				rascal = rascal + "expectedStateVariables_" + i + " = expectedStateVariables_" + i + " + Variable(identifier_" + i + ", values_" + i + ");"+ "\n";
+			}
 			for(Variable variable : testCase.getReturnVariables()){
 				rascal = rascal + "identifier_" + i + " = \"" + replaceRascalEscapedCharacter(variable.getIdentifier()) + "\";"+ "\n";
 				rascal = rascal + "values_" + i + " = [];"+ "\n";
@@ -78,7 +87,7 @@ public class RascalParser {
 				}
 				rascal = rascal + "returnVariables_" + i + " = returnVariables_" + i + " + Variable(identifier_" + i + ", values_" + i + ");"+ "\n";
 			}
-			rascal = rascal + "testCases = testCases + TestCase(id_" + i + ", formula_" + i + ", negative_" + i + ", stateVariables_" + i + ", operationParameters_" + i + ", returnVariables_" + i + ");"+ "\n";
+			rascal = rascal + "testCases = testCases + TestCase(id_" + i + ", formula_" + i + ", negative_" + i + ", stateVariables_" + i + ", operationParameters_" + i + ", expectedStateVariables_" + i + ", returnVariables_" + i + ");"+ "\n";
 		}
 		rascal = rascal + "TestSuite testSuite = TestSuite(machineName, machineInvariant, operationUnderTest, testingStrategy, coverageCriteria, testCases, oracleStrategies);";
 		return rascal;

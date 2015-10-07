@@ -9,17 +9,19 @@ public class TestCase {
 	private boolean negative; 
 	private List<Variable> stateVariables;
 	private List<Parameter> operationParameters; 
+	private List<Variable> expectedStateVariables;
 	private List<Variable> returnVariables;
 	
 	public TestCase(int id, String formula, boolean negative,
 			List<Variable> stateVariables, List<Parameter> operationParameters,
-			List<Variable> returnVariables) {
+			List<Variable> expectedStateVariables, List<Variable> returnVariables) {
 		super();
 		this.id = id;
 		this.formula = formula;
 		this.negative = negative;
 		this.stateVariables = stateVariables;
 		this.operationParameters = operationParameters;
+		this.setExpectedStateVariables(expectedStateVariables);
 		this.returnVariables = returnVariables;
 	}
 	
@@ -53,6 +55,14 @@ public class TestCase {
 	public void setOperationParameters(List<Parameter> operationParameters) {
 		this.operationParameters = operationParameters;
 	}
+	public List<Variable> getExpectedStateVariables() {
+		return expectedStateVariables;
+	}
+
+	public void setExpectedStateVariables(List<Variable> expectedStateVariables) {
+		this.expectedStateVariables = expectedStateVariables;
+	}
+
 	public List<Variable> getReturnVariables() {
 		return returnVariables;
 	}
@@ -60,11 +70,14 @@ public class TestCase {
 		this.returnVariables = returnVariables;
 	}
 
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime
+				* result
+				+ ((expectedStateVariables == null) ? 0
+						: expectedStateVariables.hashCode());
 		result = prime * result + ((formula == null) ? 0 : formula.hashCode());
 		result = prime * result + id;
 		result = prime * result + (negative ? 1231 : 1237);
@@ -78,6 +91,7 @@ public class TestCase {
 				+ ((stateVariables == null) ? 0 : stateVariables.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -87,6 +101,11 @@ public class TestCase {
 		if (getClass() != obj.getClass())
 			return false;
 		TestCase other = (TestCase) obj;
+		if (expectedStateVariables == null) {
+			if (other.expectedStateVariables != null)
+				return false;
+		} else if (!expectedStateVariables.equals(other.expectedStateVariables))
+			return false;
 		if (formula == null) {
 			if (other.formula != null)
 				return false;
@@ -119,7 +138,9 @@ public class TestCase {
 		return "TestCase [id=" + id + ", formula=" + formula + ", negative="
 				+ negative + ", stateVariables=" + stateVariables
 				+ ", operationParameters=" + operationParameters
+				+ ", expectedStateVariables=" + expectedStateVariables
 				+ ", returnVariables=" + returnVariables + "]";
 	}
+
 	
 }

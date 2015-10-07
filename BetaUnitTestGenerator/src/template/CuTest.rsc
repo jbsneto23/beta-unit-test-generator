@@ -204,15 +204,28 @@ Synopsis: Function that generate the operation call with the operation parameter
 
 }
 private str operationCall(TestSuite testSuite, TestCase testCase){
-	str call = testSuite.machineName + "$" + testSuite.operationUnderTest + "(&" + toLowerCase(testSuite.machineName);
+	str call = testSuite.machineName + "__" + testSuite.operationUnderTest + "(";
 	if(!isEmpty(testCase.operationParameters)){
+		Parameter first = testCase.operationParameters[0];
 		for(Parameter p <- testCase.operationParameters){
-			call = call + ", " + p.identifier;
+			if(first.identifier == p.identifier){
+				call = call + p.identifier;
+			} else {
+				call = call + ", " + p.identifier;
+			}
 		}
 	}
 	if(!isEmpty(testCase.returnVariables)){
+		if(!isEmpty(testCase.operationParameters)){
+			call = call + ", ";
+		}
+		Variable first = testCase.returnVariables[0];
 		for(Variable v <- testCase.returnVariables){
-			call = call + ", " + v.identifier;
+			if(first.identifier == v.identifier){
+				call = call + "&" + v.identifier;
+			} else {
+				call = call + ", " + "&" + v.identifier;
+			}
 		}
 	}
 	call = call + ")";
@@ -236,18 +249,36 @@ private bool hasCheckInvariant(TestSuite testSuite){
 
 @doc{
 
+Synopsis: Auxiliary function that change the variables names to the pattern in the check invariant function.
+
+}
+private str replaceVariablesNamesInCheckInvariant(TestSuite testSuite, str predicate){
+	str r = predicate;
+	TestCase tc = testSuite.testCases[0];
+	for(Variable variable <- tc.stateVariables){
+		if(!contains(r, testSuite.machineName + "__" + variable.identifier)){
+			r = replaceAll(r, variable.identifier, testSuite.machineName + "__" + variable.identifier);
+		}
+	}
+	return r;
+}
+
+@doc{
+
 Synopsis: Function that create the check invariant function content. Call functions to translate the invariant predicates.
 
 }
 private str templateCheckInvariant(TestSuite testSuite){
 	return 
-		"void check_invariant(CuTest* tc, <testSuite.machineName>$state$ <toLowerCase(testSuite.machineName)>) {
-		'	<for(str p <- testSuite.machineInvariant){><if(!isEmpty(translate(p))){>
-		'	if(!(<translate(p)>)){
+		"void check_invariant(CuTest* tc) {
+		'	<for(str p <- testSuite.machineInvariant){>
+		'	<if(!isEmpty(translate(p))){>
+		'	if(!(<replaceVariablesNamesInCheckInvariant(testSuite, translate(p))>)){
 		'		CuFail(tc, \"The invariant \'<p>\' was unsatisfied\");
 		'	}
-		'	<} else {>// Predicate \'<p>\' can\'t be automatically translated <}>
-		'   <}>
+		'	<} else {>
+		'	// Predicate \'<p>\' can\'t be automatically translated 
+		'	<}> <}>
 		'}
 		";
 }
@@ -266,23 +297,32 @@ private str templateTestCase(TestSuite testSuite, TestCase testCase){
 		'*/
 		'void <testSuite.machineName>_<testSuite.operationUnderTest>_test_case_<testCase.id>(CuTest* tc)
 		'{
-		'	<testSuite.machineName>$init$(&<toLowerCase(testSuite.machineName)>);
+		'	<testSuite.machineName>__INITIALISATION();
 		'	<for(Variable variable <- testCase.stateVariables){>
 		'	<variableDeclaration(testSuite, testCase.formula, variable.identifier, variable.values)> = <variableAttribution(testSuite, testCase.formula, variable.identifier, variable.values)>; 
-		'	<toLowerCase(testSuite.machineName)>.<variable.identifier> = <variable.identifier>; <}>
+		'	<testSuite.machineName>__<variable.identifier> = <variable.identifier>; 
+		'	<}>
 		'	<for(Parameter parameter <- testCase.operationParameters){>
 		'	<variableDeclaration(testSuite, testCase.formula, parameter.identifier, parameter.values)> = <variableAttribution(testSuite, testCase.formula, parameter.identifier, parameter.values)>; <}>
 		'	<for(Variable v <- testCase.returnVariables){>
-		'	// <v.identifier> return variable declaration <}>
+		'	// <v.identifier> return variable declaration 
+		'	<}>
 		'	<operationCall(testSuite, testCase)>;
 		'	<if(!isEmpty(testCase.returnVariables) && ReturnValues() in testSuite.oracleStrategies){>
 		'	<for(Variable v <- testCase.returnVariables){> 
-		'	CuAssertTrue(tc, <v.identifier> == /* Add expected value here */);<}><}>
-		'	<if(StateVariables() in testSuite.oracleStrategies){> <for(Variable variable <- testCase.stateVariables){>
+		'	CuAssertTrue(tc, <v.identifier> == /* Add expected value here */);
+		'	<}><}>
+		'	<if(StateVariables() in testSuite.oracleStrategies){> 
+		'	<if(isEmpty(testCase.expectedStateVariables)){>
+		'	<for(Variable variable <- testCase.stateVariables){>
 		'	<variableDeclaration(testSuite, testCase.formula, variable.identifier, [])>Expected; // Add expected value here.
-		'	CuAssertTrue(tc, <toLowerCase(testSuite.machineName)>.<variable.identifier> == <variable.identifier>Expected);			
-		'	<}> <}>
-		'	<if(StateInvariant() in testSuite.oracleStrategies && hasCheckInvariant(testSuite)){>check_invariant(tc, <toLowerCase(testSuite.machineName)>);<}>
+		'	CuAssertTrue(tc, <testSuite.machineName>__<variable.identifier> == <variable.identifier>Expected);			
+		'	<}> <}else{>
+		'	<for(Variable variable <- testCase.expectedStateVariables){>
+		'	<variableDeclaration(testSuite, testCase.formula, variable.identifier, variable.values)>Expected = <variableAttribution(testSuite, testCase.formula, variable.identifier, variable.values)>;
+		'	CuAssertTrue(tc, <testSuite.machineName>__<variable.identifier> == <variable.identifier>Expected);
+		'	<}><}><}>
+		'	<if(StateInvariant() in testSuite.oracleStrategies && hasCheckInvariant(testSuite)){>check_invariant(tc);<}>
 		'}
 		";
 }
@@ -304,7 +344,6 @@ public str template(TestSuite testSuite){
 		'#include \"CuTest.h\"
 		'#include \"<testSuite.machineName>.h\"
 		'
-		'<testSuite.machineName>$state$ <toLowerCase(testSuite.machineName)>;
 		'<if(StateInvariant() in testSuite.oracleStrategies && hasCheckInvariant(testSuite)){>
 		'<templateCheckInvariant(testSuite)> <}>
 		'<for(TestCase testCase <- testSuite.testCases){>
